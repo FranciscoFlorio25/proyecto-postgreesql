@@ -1,0 +1,140 @@
+= Base de Datos: Trabajo Practico
+
+Santiago Gonzalez <leosag2507@gmail.com>;
+Francisco Florio <francisco.florio25@gmail.com>;
+Tamara Fernandez <tamara96fernandez@gmail.com>; 
+Franco Torrico <francotorrico1999@gmail.com>;
+Hernán Rondelli y Hernán CZemerinski (COM - 01).
+
+== Introducción
+En el presente trabajo, los alumnos Francisco Florio, Franco Torrico y Santiago gonzalez
+Plantean solucionar la problemática de compras por tarjeta de crédito.
+La implementación plantea un sistema que interacúe con una base de datos y 
+satisfaga las necesidades del usuario.
+
+El trabajo cuenta una base de datos llamada "tarjetascredito" y cuenta con las siguientes tablas
+
+[source,sql]
+----
+cliente(
+nrocliente:int,
+nombre:text,
+apellido:text,
+domicilio:text,
+telefono:char(12)
+)
+tarjeta(
+nrotarjeta:char(16),
+nrocliente:int,
+validadesde:char(6), --e.g. 201106
+validahasta:char(6),
+codseguridad:char(4),
+limitecompra:decimal(8,2),
+estado:char(10)
+)
+comercio(
+nrocomercio:int,
+nombre:text,
+domicilio:text,
+codigopostal:char(8),
+telefono:char(12)
+)
+compra(
+nrooperacion:int,
+nrotarjeta:char(16),
+nrocomercio:int,
+fecha:timestamp,
+monto:decimal(7,2),
+pagado:boolean
+)
+rechazo(
+nrorechazo:int,
+nrotarjeta:char(16),
+nrocomercio:int,
+fecha:timestamp,
+monto:decimal(7,2),
+motivo:text
+)
+cierre(
+año:int,
+mes:int,
+terminacion:int,
+fechainicio:date,
+fechacierre:date,
+fechavto:date
+)
+cabecera(
+nroresumen:int,
+nombre:text,
+apellido:text,
+domicilio:text,
+nrotarjeta:char(16),
+desde:date,
+hasta:date,
+vence:date,
+total:decimal(8,2)
+);
+detalle(
+nroresumen:int,
+nrolinea:int,
+fecha:date,
+nombrecomercio:text,
+monto:decimal(7,2)
+);
+alerta(
+nroalerta:int,
+nrotarjeta:char(16),
+fecha:timestamp,
+nrorechazo:int,
+codalerta:int,
+descripcion:text
+);
+
+consumo(
+nrotarjeta:char(16),
+codseguridad:char(4),
+nrocomercio:int,
+monto:decimal(7,2)
+)
+----
+
+Cada tabla tiene Foreigns y primary keys que pueden ser quitadas o agregadas
+a voluntad del usuario.
+
+== descripción
+A lo largo del desarrollo se fue encontrando con diferentes problemas.
+Uno de ellos se presentó en la tabla cierre al insertar valores que se deban una primary key de año, mes, y terminación, ya que como los valores ingresados chocaban con las foreigns del número de terminación de la tarjeta, la solución que se le dió fue ingresando valores que no presenten dicho choque, por ejemplo: el año siempre será 2022, el mes: 7, terminación 8, esto hace que si hay otra tarjeta con los mismos datos, no pueda presentar la tabla cierre, la solución fue cambiar el último dígito de la tarjeta.
+
+Otro problema fue el de probar en la base de datos que el código escrito en go funcionase correctamente y que no haya en la escritura del código ningún error de sintaxis. Para facílitar el testeo se usaron archivos .sql para probar la acción en la base de datos individualmente y luego copiar ese código en un archivo 
+.go con las funciones correspondientes para conectarse a la base de datos y efectuar la operación.    
+
+
+== implemenetación
+
+Para la tabla cierre se usó este estilo de insert:
+[source,sql]
+----
+insert into cierre(año, mes, terminacion, fechainicio, fechacierre, fechavto)
+			values
+			(2022,01,5,'2022-01-01','2022-03-15','2022-04-28'),
+			
+----
+
+Para las tablas de comercio, clientes, tarjeta:
+ se uso este estilo de insert:
+[source,sql]
+----
+insert into comercio values (1, 'Fashion House', 'Av. Presidente Perón 1622/1624/1626, San Miguel, Provincia de Buenos Aires', 'B1662ASX', '541145239875');
+
+insert into tarjeta values ('5952147920589745',1,'201701','202201','7451',100000.50,'vigente');
+
+insert into cliente values (1,'Juan','Carlos','Gelly y obes 320','11504890');
+		
+----
+
+== conclusiones
+Cómo conclusiones se puede obtener que, si bien trabajar en la terminal y con go puede no ser lo más sencillo y cómodo resulta bastante versátil a la hora de escribir código con funciones de nivel de usuario ó más complejas, realizando funciones en una base de datos ó creando una aplicación de línea de comandos.   
+:titlepage:
+:numbered:
+:sourgehighlighter:
+:tabzice:
